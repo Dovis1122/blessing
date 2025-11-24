@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>祝福弹窗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .blessing-window {
+            animation: fadeIn 0.3s ease-out forwards; /* 加快淡入动画 */
+            cursor: pointer;
+            border: 1px solid #e5e7eb; /* 增加细边框，让弹窗更清晰 */
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen overflow-hidden"> <!-- 禁止页面滚动 -->
+    <script>
+        // 1. 数据 - 祝福语列表 (可以更短一些，让弹窗内容更紧凑)
+        const blessings = [
+        "保持好心情", "多喝温水~", "我想你了", "天冷了多穿衣服",
+    "好好吃饭", "好好爱自己", "别熬夜", "顺顺利利",
+    "照顾好自己", "多喝热水", "注意身体", "早点休息",
+    "记得微笑", "别太累了", "要开心哦", "一切都会好",
+    "按时吃饭", "别忘带伞", "路上小心", "好好睡觉","爱你~","记得想我","比心❤",
+    "想你啦~", "加油哦！", "别emo了", "多笑笑呀",
+    "多穿点衣", "别玩手机了", "快睡觉！", "爱你哟~",
+    "别焦虑", "慢慢来", "你最棒", "别怕哦",
+    "记得吃药", "多喝热汤", "别逞强", "有我在呢","天天开心","永远爱你","宝宝~"
+        ];
+
+        // 2. 配置 - 弹窗颜色
+        const bgColors = [
+            "bg-blue-100", "bg-green-100", "bg-purple-100", "bg-pink-100",
+            "bg-yellow-100", "bg-indigo-100", "bg-teal-100", "bg-rose-100",
+            "bg-amber-100", "bg-lime-100", "bg-cyan-100", "bg-fuchsia-100"
+        ];
+        const textColors = [
+            "text-blue-800", "text-green-800", "text-purple-800", "text-pink-800",
+            "text-yellow-800", "text-indigo-800", "text-teal-800", "text-rose-800",
+            "text-amber-800", "text-lime-800", "text-cyan-800", "text-fuchsia-800"
+        ];
+
+        let isRunning = true;
+        let creationInterval;
+        const allWindows = new Set();
+
+        // 3. 核心函数 - 创建单个弹窗 (修改版)
+        function createBlessingWindow() {
+            if (!isRunning) return;
+
+            const blessing = blessings[Math.floor(Math.random() * blessings.length)];
+            const colorIndex = Math.floor(Math.random() * bgColors.length);
+            const bgColorClass = bgColors[colorIndex];
+            const textColorClass = textColors[colorIndex];
+            
+            // 字体稍大，让内容更显眼
+            const fontSize = 'text-xl';
+
+            const windowDiv = document.createElement('div');
+            // 增大弹窗尺寸，调整内边距和最大宽度
+            windowDiv.className = `blessing-window fixed rounded-xl shadow-md p-6 max-w-[300px] break-words z-50 transition-opacity duration-300 ${bgColorClass} ${textColorClass} ${fontSize}`;
+            windowDiv.textContent = blessing;
+
+            // 随机位置 - 调整计算方式，让弹窗更均匀地分布
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            // 估算弹窗尺寸，用于更准确地计算边界
+            const windowEstimatedWidth = 320; 
+            const windowEstimatedHeight = 120;
+            
+            const x = Math.random() * (screenWidth - windowEstimatedWidth);
+            const y = Math.random() * (screenHeight - windowEstimatedHeight);
+            
+            windowDiv.style.left = `${x}px`;
+            windowDiv.style.top = `${y}px`;
+
+            // 点击弹窗可关闭
+            windowDiv.addEventListener('click', () => {
+                if (allWindows.has(windowDiv)) {
+                    windowDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        if (allWindows.has(windowDiv)) {
+                            document.body.removeChild(windowDiv);
+                            allWindows.delete(windowDiv);
+                        }
+                    }, 300);
+                }
+            });
+
+            document.body.appendChild(windowDiv);
+            allWindows.add(windowDiv);
+
+            // 自动关闭时间可以稍微缩短，让弹窗流转更快
+            const closeDelay = Math.random() * 2000 + 3000; // 3-5秒
+
+            setTimeout(() => {
+                if (allWindows.has(windowDiv)) {
+                    windowDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        if (allWindows.has(windowDiv)) {
+                            document.body.removeChild(windowDiv);
+                            allWindows.delete(windowDiv);
+                        }
+                    }, 300);
+                }
+            }, closeDelay);
+        }
+
+        // 4. 启动函数 - 极快地创建弹窗
+        function startBlessingWindows() {
+            createBlessingWindow();
+            // 以极短的间隔创建弹窗，这是实现"多"和"满"的关键
+            // 注意：过短的间隔可能会影响浏览器性能
+            creationInterval = setInterval(createBlessingWindow, 50); // 每50毫秒创建一个
+        }
+        
+        // 5. 页面加载完成后自动启动
+        window.addEventListener('load', startBlessingWindows);
+
+    </script>
+</body>
+</html>
